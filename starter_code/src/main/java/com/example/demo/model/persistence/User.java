@@ -31,6 +31,8 @@ public class User {
     @JoinColumn(name = "cart_id", referencedColumnName = "id")
 	@JsonIgnore
     private Cart cart;
+
+	private String password;
 	
 	public Cart getCart() {
 		return cart;
@@ -55,7 +57,13 @@ public class User {
 	public void setUsername(String username) {
 		this.username = username;
 	}
-	
-	
-	
+
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String encode) {
+		password = encode;
+	}
 }
