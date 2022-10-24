@@ -74,9 +74,9 @@
 			<version>4.1.0</version>
 		</dependency>
 		<dependency>
-			<groupId>com.splunk.logging</groupId>
-			<artifactId>splunk-library-javalogging</artifactId>
-			<version>1.8.0</version>
+			<groupId>com.splunk</groupId>
+			<artifactId>splunk</artifactId>
+			<version>1.6.0.0</version>
 		</dependency>
 	</dependencies>
 	<repositories>
