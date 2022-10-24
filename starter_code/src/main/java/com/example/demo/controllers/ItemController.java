@@ -2,12 +2,11 @@ package com.example.demo.controllers;
 
 import java.util.List;
 
+import com.example.demo.model.requests.CreateItemRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
 
 import com.example.demo.model.persistence.Item;
 import com.example.demo.model.persistence.repositories.ItemRepository;
@@ -23,7 +22,19 @@ public class ItemController {
 	public ResponseEntity<List<Item>> getItems() {
 		return ResponseEntity.ok(itemRepository.findAll());
 	}
-	
+
+	@PutMapping
+	public ResponseEntity<Item> makeItem(@RequestBody CreateItemRequest createItemRequest, Authentication authentication) {
+		authentication.getAuthorities();
+		Item item = new Item();
+		item.setName(createItemRequest.getName());
+		item.setDescription(createItemRequest.getDescription());
+		item.setPrice(createItemRequest.getPrice());
+		item = itemRepository.save(item);
+		return ResponseEntity.ok(item);
+	}
+
+
 	@GetMapping("/{id}")
 	public ResponseEntity<Item> getItemById(@PathVariable Long id) {
 		return ResponseEntity.of(itemRepository.findById(id));
