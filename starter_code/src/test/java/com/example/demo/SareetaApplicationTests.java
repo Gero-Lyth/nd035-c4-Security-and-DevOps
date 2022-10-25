@@ -4,8 +4,8 @@ import com.example.demo.controllers.CartController;
 import com.example.demo.controllers.ItemController;
 import com.example.demo.controllers.OrderController;
 import com.example.demo.controllers.UserController;
-import com.example.demo.model.persistence.User;
 import com.example.demo.model.requests.CreateUserRequest;
+import com.example.demo.model.requests.ModifyCartRequest;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,14 +14,15 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
@@ -43,7 +44,9 @@ public class SareetaApplicationTests {
 	ItemController itemController;
 
 	@Autowired
-	private JacksonTester<CreateUserRequest> json;
+	private JacksonTester<CreateUserRequest> userRequestJacksonTester;
+	@Autowired
+	private JacksonTester<ModifyCartRequest> modifyCartRequestJacksonTester;
 	@Autowired
 	private MockMvc mockMvc;
 
@@ -65,7 +68,7 @@ public class SareetaApplicationTests {
 	public void createCustomer() throws  Exception{
 		mockMvc.perform(
 						post(new URI("/api/user/create"))
-								.content(json.write(userDummy("Create")).getJson())
+								.content(userRequestJacksonTester.write(userDummy("Create")).getJson())
 								.contentType(MediaType.APPLICATION_JSON_UTF8)
 								.accept(MediaType.APPLICATION_JSON_UTF8))
 				.andExpect(status().isOk());
@@ -74,16 +77,45 @@ public class SareetaApplicationTests {
 	public void createDuplicateCustomer() throws  Exception{
 		mockMvc.perform(
 						post(new URI("/api/user/create"))
-								.content(json.write(userDummy()).getJson())
+								.content(userRequestJacksonTester.write(userDummy()).getJson())
 								.contentType(MediaType.APPLICATION_JSON_UTF8)
 								.accept(MediaType.APPLICATION_JSON_UTF8))
 				.andExpect(status().isOk());
 		mockMvc.perform(
 						post(new URI("/api/user/create"))
-								.content(json.write(userDummy()).getJson())
+								.content(userRequestJacksonTester.write(userDummy()).getJson())
 								.contentType(MediaType.APPLICATION_JSON_UTF8)
 								.accept(MediaType.APPLICATION_JSON_UTF8))
 				.andExpect(status().isBadRequest());
 	}
+	@Test
+	public void createOrder() throws  Exception{
+		String username = "Order";
+		mockMvc.perform(
+						post(new URI("/api/user/create"))
+								.content(userRequestJacksonTester.write(userDummy(username)).getJson())
+								.contentType(MediaType.APPLICATION_JSON_UTF8)
+								.accept(MediaType.APPLICATION_JSON_UTF8))
+				.andExpect(status().isOk());
+		ModifyCartRequest modifyCartRequest = new ModifyCartRequest();
+		modifyCartRequest.setUsername(username);
+		modifyCartRequest.setItemId(1);
+		modifyCartRequest.setQuantity(2);
+		mockMvc.perform(
+						post(new URI("/api/cart/addToCart"))
+								.content(modifyCartRequestJacksonTester.write(modifyCartRequest).getJson())
+								.contentType(MediaType.APPLICATION_JSON_UTF8)
+								.accept(MediaType.APPLICATION_JSON_UTF8)
+								.with(user(username)))
+				.andExpect(status().isOk());
 
+	}
+
+	@Test
+	public void checkItem() throws Exception {
+		mockMvc.perform(
+						get(new URI("/api/item/1")).with(user("Dmmyu")))
+				.andExpect(status().isOk()).andReturn().getResponse();
+
+	}
 }
