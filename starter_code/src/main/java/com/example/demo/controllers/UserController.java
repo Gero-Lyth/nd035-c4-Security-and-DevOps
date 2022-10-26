@@ -10,11 +10,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-import org.apache.logging.log4j.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 @RestController
 @RequestMapping("/api/user")
 public class UserController {
-	final Logger logger = org.apache.logging.log4j.core.LoggerContext.getContext().getLogger("splunk.logger");
+	final Logger logger = LogManager.getLogger(UserController.class);;
 
 	@Autowired
 	private UserRepository userRepository;
@@ -55,7 +56,7 @@ public class UserController {
 		}
 		user.setPassword(bCryptPasswordEncoder.encode(createUserRequest.getPassword()));
 		userRepository.save(user);
-		logger.debug("Created user: "+createUserRequest.getUsername());
+		logger.info("Created user: "+createUserRequest.getUsername());
 		return ResponseEntity.ok(user);
 	}
 
