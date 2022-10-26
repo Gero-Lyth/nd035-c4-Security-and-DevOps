@@ -60,7 +60,7 @@ public class CartController {
 		IntStream.range(0, request.getQuantity())
 			.forEach(i -> cart.addItem(item.get()));
 		cartRepository.save(cart);
-		logger.info(String.format("User %s not ordered item %s ", request.getUsername(),item.get().getName()));
+		logger.info(String.format("User '%s' added %d %s to cart.", request.getUsername(),request.getQuantity(),item.get().getName()));
 		return ResponseEntity.ok(cart);
 	}
 	
@@ -80,6 +80,8 @@ public class CartController {
 		IntStream.range(0, request.getQuantity())
 			.forEach(i -> cart.removeItem(item.get()));
 		cartRepository.save(cart);
+		logger.info(String.format("User '%s' removed %d %s from cart", request.getUsername(),request.getQuantity(),item.get().getName()));
+
 		return ResponseEntity.ok(cart);
 	}
 		

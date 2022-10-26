@@ -4,6 +4,7 @@ import com.example.demo.controllers.CartController;
 import com.example.demo.controllers.ItemController;
 import com.example.demo.controllers.OrderController;
 import com.example.demo.controllers.UserController;
+import com.example.demo.model.persistence.UserOrder;
 import com.example.demo.model.requests.CreateUserRequest;
 import com.example.demo.model.requests.ModifyCartRequest;
 import org.junit.Test;
@@ -23,6 +24,7 @@ import java.net.URISyntaxException;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
@@ -89,7 +91,7 @@ public class SareetaApplicationTests {
 				.andExpect(status().isBadRequest());
 	}
 	@Test
-	public void createOrder() throws  Exception{
+	public void testCartOperations() throws  Exception{
 		String username = "Order";
 		mockMvc.perform(
 						post(new URI("/api/user/create"))
@@ -100,7 +102,7 @@ public class SareetaApplicationTests {
 		ModifyCartRequest modifyCartRequest = new ModifyCartRequest();
 		modifyCartRequest.setUsername(username);
 		modifyCartRequest.setItemId(1);
-		modifyCartRequest.setQuantity(2);
+		modifyCartRequest.setQuantity(4);
 		mockMvc.perform(
 						post(new URI("/api/cart/addToCart"))
 								.content(modifyCartRequestJacksonTester.write(modifyCartRequest).getJson())
@@ -108,7 +110,31 @@ public class SareetaApplicationTests {
 								.accept(MediaType.APPLICATION_JSON_UTF8)
 								.with(user(username)))
 				.andExpect(status().isOk());
+		modifyCartRequest.setQuantity(2);
 
+		mockMvc.perform(
+						post(new URI("/api/cart/removeFromCart"))
+								.content(modifyCartRequestJacksonTester.write(modifyCartRequest).getJson())
+								.contentType(MediaType.APPLICATION_JSON_UTF8)
+								.accept(MediaType.APPLICATION_JSON_UTF8)
+								.with(user(username)))
+				.andExpect(status().isOk());
+
+		mockMvc.perform(
+						post(new URI("/api/order/submit/"+username))
+								.content(modifyCartRequestJacksonTester.write(modifyCartRequest).getJson())
+								.contentType(MediaType.APPLICATION_JSON_UTF8)
+								.accept(MediaType.APPLICATION_JSON_UTF8)
+								.with(user(username)))
+				.andExpect(status().isOk());
+		mockMvc.perform(
+						get(new URI("/api/order/history/"+username))
+								.with(user(username)))
+				.andExpect(status().isOk());
+		mockMvc.perform(
+						get(new URI("/api/order/history/aaa"+username))
+								.with(user(username)))
+				.andExpect(status().isUnauthorized());
 	}
 
 	@Test
@@ -117,5 +143,8 @@ public class SareetaApplicationTests {
 						get(new URI("/api/item/1")).with(user("Dmmyu")))
 				.andExpect(status().isOk()).andReturn().getResponse();
 
+		mockMvc.perform(
+						get(new URI("/api/item/-1")).with(user("Dmmyu")))
+				.andExpect(status().isNotFound());
 	}
 }
